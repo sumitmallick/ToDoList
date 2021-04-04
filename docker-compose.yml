@@ -1,0 +1,39 @@
+version: '3'
+services:
+  app:
+    restart: unless-stopped
+    image: pyrello
+    build:
+      context: ./
+    depends_on:
+      - postgres
+    environment:
+      - DATABASE_URL=postgresql://pyrello:pyrello@postgres:5432/pyrello
+      - TEST_DATABASE_URL=postgresql://pyrello_test:pyrello_test@postgres:5432/pyrello_test
+    ports:
+      - '127.0.0.1:5000:5000'
+    volumes:
+      - '.:/pyrello'
+  postgres:
+    restart: unless-stopped
+    image: postgres:10.4
+    environment:
+      POSTGRES_DB: pyrello
+      POSTGRES_USER: pyrello
+      POSTGRES_PASSWORD: pyrello
+    ports:
+      - '127.0.0.1:5432:5432'
+    volumes:
+      - './postgres:/docker-entrypoint-initdb.d'
+      - 'postgres-data:/var/lib/postgresql/data'
+  test_postgres:
+    restart: unless-stopped
+    image: postgres:10.4-alpine
+    ports:
+      - "127.0.0.1:5433:5432"
+    environment:
+      POSTGRES_DB: pyrello_test
+      POSTGRES_USER: pyrello_test
+      POSTGRES_PASSWORD: pyrello_test
+volumes:
+  postgres-data:
